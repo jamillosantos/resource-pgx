@@ -9,8 +9,9 @@ import (
 
 type Resource struct {
 	*pgxpool.Pool
-	name   string
-	config PlatformConfig
+	name                      string
+	config                    PlatformConfig
+	disableConnectionOnStatup bool
 }
 
 func NewResource(config PlatformConfig, options ...Option) *Resource {
@@ -21,6 +22,8 @@ func NewResource(config PlatformConfig, options ...Option) *Resource {
 	return &Resource{
 		name:   opt.name,
 		config: config,
+
+		disableConnectionOnStatup: opt.disableConnectionOnStatup,
 	}
 }
 
@@ -34,7 +37,10 @@ func (r *Resource) Start(ctx context.Context) error {
 		return fmt.Errorf("unable to connect to database: %w", err)
 	}
 	r.Pool = conn
-	return nil
+	if r.disableConnectionOnStatup {
+		return nil
+	}
+	return conn.Ping(ctx)
 }
 
 func (r *Resource) Stop(ctx context.Context) error {
