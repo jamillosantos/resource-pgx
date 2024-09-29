@@ -1,7 +1,8 @@
 package rscpgx
 
 type opts struct {
-	name string
+	name                      string
+	disableConnectionOnStatup bool
 }
 
 // Option is a function that can be used to configure a resource.
@@ -17,5 +18,11 @@ func defaultOpts() opts {
 func WithName(name string) Option {
 	return func(r *opts) {
 		r.name = name
+	}
+}
+
+func WithDisableTestConnectionOnStartUp() Option {
+	return func(r *opts) {
+		r.disableConnectionOnStatup = true
 	}
 }
